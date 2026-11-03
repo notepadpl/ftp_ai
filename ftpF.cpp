@@ -51,11 +51,11 @@ void send_universal_ftp_request(const char* action, const char* extra_param) {
     emscripten_fetch_attr_t attr;
     emscripten_fetch_attr_init(&attr);
     strcpy(attr.requestMethod, "GET");
-    attr.attributes = EMSCRIPTEN_FETCH_LOAD_IN_MEMORY;
+    attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY; // Poprawiona nazwa flagi
     attr.onsuccess = ftp_success_callback;
     attr.onerror = ftp_error_callback;
 
-    emscripten_fetch(full_url, &attr);
+    emscripten_fetch(&attr, full_url); // Zmieniona kolejność: najpierw &attr, potem URL
 }
 
 // --- EKSPORTOWANA FUNKCJA OBSŁUGI KOMEND ---
