@@ -26,7 +26,7 @@ jobs:
 
       - name: Compile C to WebAssembly (Pthreads & Proxy)
         run: |
-          emcc ftp_ai.cpp -o index.js \
+          emcc ftp_ia.cpp -o index.js \
             -s WASM=1 \
             -s USE_PTHREADS=1 \
             -s PTHREAD_POOL_SIZE=2 \
