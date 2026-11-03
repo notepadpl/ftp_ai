@@ -1,4 +1,4 @@
-name: Deploy Universal FTP Genie WASM to GitHub Pages
+name: Deploy Universal FTP Gnie WASM to GitHub Pages
 
 on:
   push:
