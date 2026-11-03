@@ -9,6 +9,37 @@
 #include <sys/select.h>
 
 #define BUFLEN 512
+#include <stdio.h>
+#include <string.h>
+#include <emscripten/emscripten.h>
+
+// Globalna zmienna stanu, do której ma dostęp i main, i nasza funkcja z JS
+static char g_current_directory[256] = "/";
+static int g_ftp_logged_in = 0;
+
+// --- FUNKCJA WYWOŁYWANA Z JAVASCRIPTU (Przycisk "Wyślij" w telefonie) ---
+extern "C" {
+    EMSCRIPTEN_KEEPALIVE
+    const char* execute_shell_command(const char* cmd) {
+        static char response_buf[1024];
+
+        // Przykładowa obsługa komend w C
+        if (strncmp(cmd, "cd ", 3) == 0) {
+            // Zmieniamy stan globalny, który widzi reszta programu
+            strncpy(g_current_directory, cmd + 3, sizeof(g_current_directory) - 1);
+            snprintf(response_buf, sizeof(response_buf), "Zmieniono katalog na: %s", g_current_directory);
+        } 
+        else if (strcmp(cmd, "pwd") == 0) {
+            snprintf(response_buf, sizeof(response_buf), "Aktualny katalog: %s", g_current_directory);
+        }
+        else {
+            snprintf(response_buf, sizeof(response_buf), "Dżin wykonał komendę: %s", cmd);
+        }
+
+        return response_buf; // Zwracamy wynik bezpośrednio do JavaScriptu na ekran telefonu
+    }
+}
+
 
 // --- 1. STRUKTURA DŻINA I MATRYCY W RAM ---
 typedef struct {
