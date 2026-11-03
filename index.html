@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>CyberWASM & FTP Genie Terminal</title>
+    <style>
+        body { background: #0d1117; color: #00ffcc; font-family: 'Courier New', Courier, monospace; padding: 20px; }
+        .box { border: 1px solid #30363d; background: #161b22; padding: 15px; margin-bottom: 15px; border-radius: 6px; }
+        #terminal-output { background: #010409; color: #7ee787; padding: 10px; height: 250px; overflow-y: auto; border: 1px solid #30363d; font-size: 0.9em; margin-bottom: 10px; white-space: pre-wrap; }
+        input[type="text"] { width: 70%; padding: 8px; background: #0d1117; border: 1px solid #30363d; color: #fff; font-family: monospace; }
+        button { padding: 8px 15px; background: #238636; color: white; border: none; cursor: pointer; font-family: monospace; border-radius: 4px; }
+        button:hover { background: #2ea043; }
+    </style>
+</head>
+<body>
+    <h1>[ CyberWASM & FTP Genie (Background Pthread) ]</h1>
+    
+    <div class="box">
+        <p>Status Silnika C++ (WASM Worker): <strong id="ai-status" style="color: yellow;">Uruchamianie wątku w tle...</strong></p>
+    </div>
+
+    <div class="box">
+        <h3>> Interaktywny Terminal FTP (C++ w Workerze)</h3>
+        <div id="terminal-output">Inicjalizowanie środowiska Dżina FTP...<br></div>
+        <input type="text" id="cmd-input" placeholder="Wpisz komendę (np. user anonymous, list, get README)..." onkeydown="if(event.key === 'Enter') sendCommandToC()">
+        <button onclick="sendCommandToC()">Wyślij</button>
+    </div>
+
+    <script>
+        // Funkcja logująca w terminalu na stronie
+        function logToTerminal(text, isError = false) {
+            const term = document.getElementById('terminal-output');
+            term.innerHTML += `<span style="color: ${isError ? '#ff7b72' : '#7ee787'}">${text}</span>`;
+            term.scrollTop = term.scrollHeight;
+        }
+
+        // Konfiguracja obiektu Module dla Emscriptena
+        var Module = {
+            print: function(text) {
+                logToTerminal(text + "\n");
+            },
+            printErr: function(text) {
+                logToTerminal(text + "\n", true);
+            },
+            onRuntimeInitialized: function() {
+                document.getElementById('ai-status').innerText = "Aktywny w tle (Pthread/Worker) 🧠🚀";
+                logToTerminal("🧞 [Dżin]: Środowisko WebAssembly i wątek w tle gotowe do pracy!\n");
+            }
+        };
+
+        // Wysyłanie komendy z pola tekstowego do programu C (poprzez stdin w workerze)
+        function sendCommandToC() {
+            const input = document.getElementById('cmd-input');
+            const cmd = input.value.trim();
+            if (!cmd) return;
+
+            logToTerminal("> " + cmd + "\n");
+            
+            // Jeśli moduł wspiera wirtualne pisanie do stdin (dostarczane przez proxy)
+            if (typeof Module.stringToUTF8 === 'function' || window.JSEvents) {
+                // Emscripten w trybie PROXY_TO_PTHREAD przekazuje zdarzenia klawiatury
+                // Możemy też wysłać tekst bezpośrednio do standardowego wejścia stdin workera:
+                if (Module.stdin) {
+                    for (let i = 0; i < cmd.length; i++) {
+                        Module.stdin(cmd.charCodeAt(i));
+                    }
+                    Module.stdin(10); // Nowa linia (\n) odpowiadająca ENTER
+                }
+            }
+            input.value = "";
+        }
+    </script>
+
+    <!-- Skrypt wygenerowany przez Emscripten ładuje się na końcu -->
+    <script src="index.js"></script>
+</body>
+</html>
