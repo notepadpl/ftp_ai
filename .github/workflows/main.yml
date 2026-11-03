@@ -1,4 +1,4 @@
-name: Deploy FTP Genie WASM to GitHub Pages
+name: Deploy Universal FTP Genie WASM to GitHub Pages
 
 on:
   push:
@@ -24,13 +24,13 @@ jobs:
       - name: Verify Emscripten version
         run: emcc -v
 
-      - name: Compile C to WebAssembly (Single-Thread)
+      - name: Compile C to WebAssembly (Universal with Fetch)
         run: |
           emcc ftpF.cpp -o index.js \
             -s WASM=1 \
+            -s FETCH=1 \
             -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap"]' \
-            -s EXPORTED_FUNCTIONS='["_execute_shell_command"]' \
-            --preload-file network_anomaly.onnx
+            -s EXPORTED_FUNCTIONS='["_execute_shell_command"]'
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v4
